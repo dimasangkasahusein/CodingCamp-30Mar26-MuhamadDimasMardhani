@@ -1,0 +1,305 @@
+# Implementation Plan: Expense & Budget Visualizer
+
+## Overview
+
+This implementation plan breaks down the Expense & Budget Visualizer into discrete coding tasks following the MVC architecture defined in the design document. The application will be built with vanilla JavaScript, HTML, and CSS, with all data persisted in browser Local Storage. Tasks are organized to build incrementally, validating core functionality early through code.
+
+## Tasks
+
+- [x] 1. Set up project structure and HTML foundation
+  - Create directory structure: `css/`, `js/`, and root `index.html`
+  - Write HTML skeleton with semantic structure for transaction form, list, balance display, and chart canvas
+  - Include viewport meta tag for responsive design
+  - Link CSS and JavaScript files
+  - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 15.1, 15.2, 15.3_
+
+- [x] 2. Implement core data models and TransactionManager
+  - [x] 2.1 Create Transaction data model and validation
+    - Define Transaction structure with id, item, amount, category, timestamp
+    - Implement validation functions for item (non-empty), amount (positive number), category (valid)
+    - _Requirements: 1.1, 1.6, 1.7_
+  - [x] 2.2 Implement TransactionManager class
+    - Write constructor to initialize empty transaction array
+    - Implement addTransaction method with validation and unique ID generation
+    - Implement deleteTransaction method
+    - Implement getTransactions method
+    - Implement getBalance method to sum all transaction amounts
+    - Implement getCategoryTotals method to aggregate spending by category
+    - _Requirements: 1.3, 1.4, 3.2, 4.2, 5.2_
+  - [ ]\* 2.3 Write property test for Transaction creation
+    - **Property 1: Transaction Creation with Valid Input**
+    - **Validates: Requirements 1.3, 1.4**
+    - Generate random valid transaction data and verify transaction is added to list
+
+- [x] 3. Implement StorageService for data persistence
+  - [x] 3.1 Create StorageService class with storage keys
+    - Define static KEYS object for all storage keys
+    - Implement saveTransactions method to serialize and store transaction array
+    - Implement loadTransactions method to retrieve and deserialize transactions
+    - Handle JSON parse errors gracefully
+    - _Requirements: 6.1, 6.2, 6.3_
+  - [x] 3.2 Add category and preference storage methods
+    - Implement saveCategories and loadCategories methods
+    - Implement saveTheme and loadTheme methods
+    - Implement saveSpendingLimit and loadSpendingLimit methods
+    - Implement saveSortPreference and loadSortPreference methods
+    - _Requirements: 7.3, 7.4, 10.2, 11.4_
+  - [ ]\* 3.3 Write unit tests for StorageService
+    - Test save and load operations for each data type
+    - Test error handling for corrupted data
+    - _Requirements: 6.1, 6.2, 6.3_
+
+- [x] 4. Implement TransactionView for UI rendering
+  - [x] 4.1 Create TransactionView class with list rendering
+    - Implement renderTransactionList method to generate HTML for each transaction
+    - Include delete button for each transaction item
+    - Display item name, amount, and category for each transaction
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 3.1_
+  - [x] 4.2 Implement balance display and form management
+    - Implement renderBalance method with spending limit indicator
+    - Implement clearForm method to reset input fields
+    - Implement showError and hideError methods for validation messages
+    - _Requirements: 1.5, 1.6, 4.1, 10.3, 10.4_
+  - [x] 4.3 Add sorting and monthly view rendering
+    - Implement updateSortIndicator method for visual sort feedback
+    - Implement renderMonthlyView method to display monthly summaries
+    - _Requirements: 8.1, 8.4, 9.1_
+  - [ ]\* 4.4 Write property test for form clearing
+    - **Property 2: Form Clearing After Submission**
+    - **Validates: Requirements 1.5**
+    - Verify form fields are empty after successful transaction addition
+
+- [x] 5. Checkpoint - Ensure core data flow works
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [ ] 6. Implement ChartRenderer for pie chart visualization
+  - [x] 6.1 Create ChartRenderer class with Canvas API
+    - Write constructor to initialize canvas context
+    - Implement calculateSegments method to convert category totals to pie segments
+    - Assign distinct colors to each category
+    - _Requirements: 5.1, 5.2, 5.3_
+  - [x] 6.2 Implement chart drawing methods
+    - Implement drawPieChart method using Canvas 2D arc drawing
+    - Implement drawLegend method to show category names and percentages
+    - Implement renderEmptyState for when no transactions exist
+    - Implement clear method to reset canvas
+    - Handle responsive canvas sizing for different screen sizes
+    - _Requirements: 5.1, 5.3, 5.6, 15.5_
+  - [ ]\* 6.3 Write unit tests for chart calculations
+    - Test segment angle calculations for various category distributions
+    - Test empty state rendering
+    - _Requirements: 5.2, 5.6_
+
+- [ ] 7. Implement UIController for event handling and coordination
+  - [x] 7.1 Create UIController class and initialization
+    - Write constructor to accept TransactionManager and StorageService instances
+    - Implement init method to load data from storage and render initial state
+    - Bind event listeners for form submission, delete buttons, sort controls
+    - _Requirements: 6.3, 6.4, 6.5, 6.6_
+  - [x] 7.2 Implement form submission and validation
+    - Implement handleFormSubmit method with input validation
+    - Check for empty fields and show validation errors
+    - Call TransactionManager.addTransaction on valid input
+    - Trigger storage save and view updates
+    - Clear form after successful submission
+    - _Requirements: 1.3, 1.4, 1.5, 1.6, 1.7, 6.1_
+  - [x] 7.3 Implement transaction deletion handler
+    - Implement handleDeleteTransaction method
+    - Remove transaction from TransactionManager
+    - Update storage and refresh all views (list, balance, chart)
+    - _Requirements: 3.2, 3.3, 3.4, 6.2_
+  - [ ]\* 7.4 Write property test for invalid input prevention
+    - **Property 3: Invalid Input Prevention**
+    - **Validates: Requirements 1.6, 1.7**
+    - Generate invalid transaction data and verify no transaction is created
+  - [ ]\* 7.5 Write integration tests for transaction lifecycle
+    - Test complete add-display-delete flow
+    - Verify balance and chart updates at each step
+    - _Requirements: 1.3, 1.4, 2.6, 3.2, 3.3, 3.4, 4.3, 4.4, 5.4, 5.5_
+
+- [ ] 8. Implement sorting functionality
+  - [x] 8.1 Add sorting methods to TransactionManager
+    - Implement getSortedTransactions method with sortBy and order parameters
+    - Support sorting by amount (ascending/descending)
+    - Support sorting by category (alphabetical grouping)
+    - _Requirements: 9.2, 9.3_
+  - [x] 8.2 Implement sort event handlers in UIController
+    - Implement handleSortChange method
+    - Update sort preference in storage
+    - Re-render transaction list with sorted data
+    - Maintain sort order when new transactions are added
+    - _Requirements: 9.1, 9.2, 9.3, 9.4_
+  - [ ]\* 8.3 Write unit tests for sorting
+    - Test amount sorting in both directions
+    - Test category grouping
+    - Test sort persistence
+    - _Requirements: 9.2, 9.3, 9.4_
+
+- [ ] 9. Implement monthly summary feature
+  - [x] 9.1 Add monthly filtering to TransactionManager
+    - Implement getTransactionsByMonth method to filter by year and month
+    - Implement getMonthlyTotals method to calculate spending per month
+    - _Requirements: 8.2, 8.3_
+  - [x] 9.2 Implement monthly view UI and handlers
+    - Add month selector UI elements to HTML
+    - Implement handleMonthSelect method in UIController
+    - Update TransactionView to display filtered transactions
+    - Display monthly spending totals
+    - _Requirements: 8.1, 8.4, 8.5_
+  - [ ]\* 9.3 Write unit tests for monthly calculations
+    - Test transaction grouping by month
+    - Test monthly total calculations
+    - _Requirements: 8.2, 8.3_
+
+- [x] 10. Checkpoint - Ensure sorting and monthly features work
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 11. Implement custom categories feature
+  - [x] 11.1 Add custom category management to TransactionManager
+    - Maintain list of available categories (default + custom)
+    - Implement addCategory method to add custom categories
+    - Validate category names (non-empty, unique)
+    - _Requirements: 7.1, 7.2_
+  - [x] 11.2 Implement custom category UI
+    - Add input field and button for adding custom categories
+    - Implement handleCategoryAdd method in UIController
+    - Update category dropdown when custom category is added
+    - Save custom categories to storage
+    - Load custom categories on application init
+    - _Requirements: 7.1, 7.2, 7.3, 7.4_
+  - [x] 11.3 Update ChartRenderer for custom categories
+    - Assign colors to custom categories dynamically
+    - Include custom categories in pie chart segments
+    - _Requirements: 7.5_
+  - [ ]\* 11.4 Write unit tests for custom categories
+    - Test category addition and validation
+    - Test category persistence
+    - Test chart rendering with custom categories
+    - _Requirements: 7.2, 7.3, 7.4, 7.5_
+
+- [x] 12. Implement spending limit alerts
+  - [x] 12.1 Add spending limit management
+    - Add input field for setting spending limit in HTML
+    - Implement handleSpendingLimitSet method in UIController
+    - Save spending limit to storage
+    - Load spending limit on application init
+    - _Requirements: 10.1, 10.2_
+  - [x] 12.2 Implement limit alert UI
+    - Update renderBalance method to check against spending limit
+    - Add CSS class to highlight balance when limit exceeded
+    - Display visual indicator (icon or message) when over limit
+    - Calculate and display remaining budget amount
+    - _Requirements: 10.3, 10.4, 10.5_
+  - [ ]\* 12.3 Write unit tests for spending limit logic
+    - Test limit comparison logic
+    - Test remaining budget calculation
+    - _Requirements: 10.3, 10.4, 10.5_
+
+- [x] 13. Implement ThemeManager for dark/light mode
+  - [x] 13.1 Create ThemeManager class
+    - Write constructor to accept StorageService instance
+    - Implement init method to load and apply saved theme
+    - Implement toggleTheme method to switch between dark and light
+    - Implement applyTheme method to add/remove CSS classes on document root
+    - _Requirements: 11.1, 11.2, 11.4, 11.5_
+  - [x] 13.2 Add theme toggle UI and handler
+    - Add theme toggle button to HTML
+    - Implement handleThemeToggle method in UIController
+    - Wire toggle button to ThemeManager
+    - _Requirements: 11.1, 11.2_
+  - [ ]\* 13.3 Write unit tests for theme management
+    - Test theme switching
+    - Test theme persistence
+    - _Requirements: 11.2, 11.4, 11.5_
+
+- [x] 14. Implement CSS styling with responsive design
+  - [x] 14.1 Create base styles and layout
+    - Write CSS for overall page layout and container structure
+    - Style input form with proper spacing and alignment
+    - Style transaction list with scrollable container
+    - Style balance display prominently at top
+    - _Requirements: 2.5, 4.1, 15.1, 15.2, 15.3_
+  - [x] 14.2 Style chart and visual elements
+    - Style canvas container for pie chart
+    - Add spacing and borders for visual separation
+    - Style delete buttons and interactive controls
+    - _Requirements: 5.1, 15.5_
+  - [x] 14.3 Implement responsive breakpoints
+    - Add media queries for mobile screens (< 768px)
+    - Add media queries for tablet screens (768px - 1024px)
+    - Add media queries for desktop screens (> 1024px)
+    - Ensure touch-friendly button sizes on mobile (min 44px)
+    - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
+  - [x] 14.4 Implement dark and light theme styles
+    - Define CSS variables for colors in both themes
+    - Create .dark-theme class with dark color scheme
+    - Create .light-theme class with light color scheme
+    - Ensure sufficient contrast for accessibility
+    - _Requirements: 11.3_
+
+- [x] 15. Checkpoint - Ensure all features integrated
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 16. Wire all components together in main application
+  - [x] 16.1 Create application initialization script
+    - Instantiate StorageService
+    - Instantiate TransactionManager
+    - Instantiate ChartRenderer with canvas element
+    - Instantiate TransactionView
+    - Instantiate ThemeManager
+    - Instantiate UIController with all dependencies
+    - Call UIController.init() on DOMContentLoaded
+    - _Requirements: 6.3, 6.4, 6.5, 6.6_
+  - [x] 16.2 Implement updateAllViews coordination method
+    - Call renderTransactionList with current transactions
+    - Call renderBalance with current balance and limit
+    - Call ChartRenderer.render with category totals
+    - Ensure all views stay synchronized on data changes
+    - _Requirements: 2.6, 4.3, 4.4, 5.4, 5.5_
+  - [ ]\* 16.3 Write integration tests for complete application flow
+    - Test full user journey: add transactions, view chart, delete, sort, filter
+    - Test data persistence across simulated page reloads
+    - Test theme switching with data present
+    - _Requirements: 1.3, 1.4, 2.6, 3.2, 3.3, 3.4, 4.3, 4.4, 5.4, 5.5, 6.1, 6.2, 11.2_
+
+- [-] 17. Performance optimization and browser compatibility
+  - [-] 17.1 Optimize rendering performance
+    - Implement debouncing for chart re-renders during rapid updates
+    - Use document fragments for batch DOM updates in transaction list
+    - Minimize reflows by batching style changes
+    - _Requirements: 13.2, 13.3, 13.4_
+  - [ ] 17.2 Test browser compatibility
+    - Verify functionality in Chrome (latest version)
+    - Verify functionality in Firefox (latest version)
+    - Verify functionality in Edge (latest version)
+    - Verify functionality in Safari (latest version)
+    - Ensure only standard Web APIs are used (no experimental features)
+    - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5_
+  - [ ] 17.3 Optimize initial load performance
+    - Minimize CSS and JavaScript file sizes
+    - Ensure initial render completes within 2 seconds
+    - Test with throttled network conditions
+    - _Requirements: 13.1_
+  - [ ]\* 17.4 Write performance tests
+    - Test transaction addition response time (< 100ms)
+    - Test transaction deletion response time (< 100ms)
+    - Test sort/filter response time (< 200ms)
+    - _Requirements: 13.2, 13.3, 13.4_
+
+- [ ] 18. Final checkpoint and validation
+  - Ensure all tests pass, ask the user if questions arise.
+  - Verify all requirements are implemented
+  - Test complete application on multiple devices and browsers
+  - Validate responsive design at various screen sizes
+
+## Notes
+
+- Tasks marked with `*` are optional and can be skipped for faster MVP
+- Each task references specific requirements for traceability
+- Checkpoints ensure incremental validation throughout development
+- Property tests validate universal correctness properties from the design document
+- Unit tests validate specific examples and edge cases
+- Integration tests ensure components work together correctly
+- The application uses vanilla JavaScript with no external dependencies
+- All data is stored client-side using browser Local Storage
+- The MVC architecture ensures clean separation of concerns despite single-file constraints

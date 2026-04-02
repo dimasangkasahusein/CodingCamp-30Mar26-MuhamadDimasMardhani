@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Track your expenses and visualize spending patterns with the Expense & Budget Visualizer">
+    <title>Expense & Budget Visualizer</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%234CAF50'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white' font-family='Arial, sans-serif' font-weight='bold'%3E$%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <svg class="header-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                </svg>
+                Expense & Budget Visualizer
+            </h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </header>
+
+        <main>
+            <!-- Balance Display Section -->
+            <section class="balance-section" aria-labelledby="balance-heading">
+                <h2 id="balance-heading">
+                    <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="5" width="20" height="14" rx="2"/>
+                        <line x1="2" y1="10" x2="22" y2="10"/>
+                    </svg>
+                    Total Balance
+                </h2>
+                <div class="balance-display">
+                    <span class="balance-amount" id="balance-amount">$0.00</span>
+                </div>
+                <div class="balance-status-container">
+                    <span class="balance-status" id="balance-status"></span>
+                </div>
+                <div class="spending-limit-control">
+                    <label for="spending-limit">Set Spending Limit:</label>
+                    <input type="number" id="spending-limit" placeholder="Enter limit" min="0" step="0.01">
+                    <button id="set-limit-btn">Set Limit</button>
+                </div>
+                <div class="remaining-budget" id="remaining-budget"></div>
+            </section>
+
+            <!-- Transaction Input Form -->
+            <section class="transaction-form-section" aria-labelledby="form-heading">
+                <h2 id="form-heading">
+                    <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="16"/>
+                        <line x1="8" y1="12" x2="16" y2="12"/>
+                    </svg>
+                    Add Transaction
+                </h2>
+                <form id="transaction-form" novalidate>
+                    <div class="form-group">
+                        <label for="item-name">Item Name:</label>
+                        <input 
+                            type="text" 
+                            id="item-name" 
+                            name="item" 
+                            placeholder="Enter item name" 
+                            required
+                            aria-required="true">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="amount">Amount:</label>
+                        <input 
+                            type="number" 
+                            id="amount" 
+                            name="amount" 
+                            placeholder="0.00" 
+                            min="0.01" 
+                            step="0.01" 
+                            required
+                            aria-required="true">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Category:</label>
+                        <div class="category-control-group">
+                            <select id="category" name="category" required aria-required="true">
+                                <option value="">Select category</option>
+                                <option value="Food">Food</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Fun">Fun</option>
+                            </select>
+                            <button type="button" id="manage-categories-btn" class="manage-categories-btn" aria-label="Manage categories" title="Manage categories">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <path d="M12 1v6m0 6v6M1 12h6m6 0h6"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="error-message" id="form-error" role="alert" aria-live="polite"></div>
+
+                    <button type="submit" class="submit-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="16"/>
+                            <line x1="8" y1="12" x2="16" y2="12"/>
+                        </svg>
+                        Add Transaction
+                    </button>
+                </form>
+            </section>
+
+            <!-- Two Column Layout: Transaction History & Chart -->
+            <div class="two-column-layout">
+                <!-- Transaction List Section -->
+                <section class="transaction-list-section" aria-labelledby="list-heading">
+                    <div class="list-header">
+                        <h2 id="list-heading">
+                            <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="9" y1="15" x2="15" y2="15"/>
+                            </svg>
+                            Transaction History
+                        </h2>
+                        <div class="list-controls">
+                            <div class="sort-controls">
+                                <label for="sort-by">Sort by:</label>
+                                <select id="sort-by" aria-label="Sort transactions">
+                                    <option value="date-desc">Date (Newest)</option>
+                                    <option value="date-asc">Date (Oldest)</option>
+                                    <option value="amount-desc">Amount (High to Low)</option>
+                                    <option value="amount-asc">Amount (Low to High)</option>
+                                    <option value="category">Category</option>
+                                </select>
+                            </div>
+                            <div class="month-selector">
+                                <label for="month-filter">Filter by Month:</label>
+                                <select id="month-filter" aria-label="Filter by month">
+                                    <option value="all">All Months</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <ul id="transaction-list" class="transaction-list" role="list">
+                        <!-- Transactions will be dynamically inserted here -->
+                    </ul>
+                    <div class="empty-state" id="empty-state">
+                        <p>No transactions yet. Add your first transaction above!</p>
+                    </div>
+                </section>
+
+                <!-- Chart Visualization Section -->
+                <section class="chart-section" aria-labelledby="chart-heading">
+                    <h2 id="chart-heading">
+                        <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
+                            <path d="M22 12A10 10 0 0 0 12 2v10z"/>
+                        </svg>
+                        Spending by Category
+                    </h2>
+                    <div class="chart-container-wrapper">
+                        <div class="chart-canvas-area">
+                            <canvas id="spending-chart" aria-label="Pie chart showing spending distribution by category"></canvas>
+                            <div class="chart-empty-state" id="chart-empty-state">
+                                <p>Add transactions to see your spending visualization</p>
+                            </div>
+                        </div>
+                        <div id="chart-legend" class="chart-legend-inline"></div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Monthly Summary Section -->
+            <section class="monthly-summary-section" aria-labelledby="summary-heading">
+                <h2 id="summary-heading">
+                    <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    Monthly Summary
+                </h2>
+                <div id="monthly-summary" class="monthly-summary">
+                    <!-- Monthly totals will be dynamically inserted here -->
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Expense & Budget Visualizer - Dimas</p>
+        </footer>
+    </div>
+
+    <!-- Category Management Modal -->
+    <div id="category-modal" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">
+                    <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Manage Categories
+                </h3>
+                <button type="button" class="modal-close" aria-label="Close modal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="category-add-section">
+                    <input 
+                        type="text" 
+                        id="modal-category-input" 
+                        placeholder="Enter new category name"
+                        aria-label="New category name">
+                    <button type="button" id="modal-add-category-btn" class="btn-icon" title="Add category">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Add
+                    </button>
+                </div>
+                <div class="category-list-section">
+                    <h4>Existing Categories:</h4>
+                    <ul id="modal-category-list" class="modal-category-list">
+                        <!-- Categories will be dynamically inserted here -->
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="modal-save-btn" class="btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Save
+                </button>
+                <button type="button" id="modal-cancel-btn" class="btn-secondary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
